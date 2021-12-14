@@ -18,6 +18,24 @@ function [S_curr, Pose_curr] = ProcessFrame(S_prev,  Frame_prev, Frame_curr)
 % R: relative rotation matrix; 
 % T: relative translation;
 
+% calculate current transformation from KLT with previous P's and X's 
+% (KLT to find new P-s then P3P RANSAC for R and T)
+% P_i = [2,3 ; 4,5; 7,8] X_i = [2,3 ; 4,5; 7,8]
+% P_i+1 = [4,5 ; 7,9] X_i+1 = [2,3 ; 4,5]
+P_temp, X_temp, R_curr, T_curr = getCurrentTransform(P_prev, X_prev, Frame_prev, Frame_curr);
 
+% track C's from before with KLT and get new coordinates
+C_temp, F_temp, Tau_temp = trackCandidateKeypoints(C_prev, F_prev, Tau_prev, Frame_prev, Frame_curr);
+ 
+% transform some of the C_temp into P_new (triangulation)
+P_new, X_new, C_cleaned, F_cleaned, Tau_cleaned = calculateNewKeypoints(C_temp, R, T, F_temp, Tau_temp);
+
+% append them to P_temp, and X_temp
+P_curr = [P_temp, P_new];
+X_curr = [X_temp, X_new];
+
+% find new candidate keypoints, supress ones already tracked (harris,
+% supress previous points)
+C_curr, F_curr, Tau_curr = findNewCandidateKeypoints(P_curr, C_cleaned, F_cleaned, Tau_cleaned, Frame_curr, R, T);
 end
 
