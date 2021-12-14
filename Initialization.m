@@ -10,11 +10,12 @@ function [P0,X0,Pose] = Initialization(frame1,frame2, K)
 % T: relative translation (to express point from frame 2 to frame 1);
 
 % Find keypoints in first frame (use function from process frame, but don't
-% supress anything)
+% supress anything) (Jeremy)
 Key_initial = findInitialKeypoints(frame_1, K);
 
-% use KLT to track keypoints to third frame
+% use KLT to track keypoints to third frame (Andrea)
 Key_matched, P_3 = 
+
 % Do 8 point RANSAC with keypoint pairs
 %%%%%%TODO
 M_3 = eightPointRansac(Key_matched, P_3);
@@ -22,7 +23,7 @@ M_3 = eightPointRansac(Key_matched, P_3);
 % triangulate X'sm M_0 is 0
 X_3 = ...(key_matched, M_3, P_3)
     
-% find keypoints in frame 2 (supress P's) --> 
+% find keypoints in frame 2 (supress P's) --> (Jeremy)
 C_3, F_3, Tau_3 = ...(frame2, P_3, M_3)
 
 end
