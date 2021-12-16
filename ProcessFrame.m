@@ -26,7 +26,7 @@ function [S_curr, Pose_curr] = ProcessFrame(S_prev,  Frame_prev, Frame_curr, K)
 P_temp, X_temp= trackPreviousKeypoints(P_prev, X_prev, Frame_prev, Frame_curr);
 
 % get current pose from points and world positions (Jonny)
-R_curr, T_curr = p3pRansac(X_temp, P_temp);
+[R_curr, T_curr] = p3pRansac(X_temp, P_temp, K);
 
 % track C's from before with KLT and get new coordinates (Andrea)
 C_temp, F_temp, Tau_temp = trackCandidateKeypoints(C_prev, F_prev, Tau_prev, Frame_prev, Frame_curr);
