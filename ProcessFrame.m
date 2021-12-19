@@ -23,13 +23,13 @@ function [S_curr, Pose_curr] = ProcessFrame(S_prev,  Frame_prev, Frame_curr, K)
 % (KLT to find new P-s)
 % P_i = [2,3 ; 4,5; 7,8] X_i = [2,3 ; 4,5; 7,8]
 % P_i+1 = [4,5 ; 7,9] X_i+1 = [2,3 ; 4,5]
-P_temp, X_temp= trackPreviousKeypoints(P_prev, X_prev, Frame_prev, Frame_curr);
+P_temp, X_temp= TrackPreviousKeypoints(P_prev, X_prev, Frame_prev, Frame_curr);
 
 % get current pose from points and world positions (Jonny)
 [R_curr, T_curr] = p3pRansac(X_temp, P_temp, K);
 
 % track C's from before with KLT and get new coordinates (Andrea)
-C_temp, F_temp, Tau_temp = trackCandidateKeypoints(C_prev, F_prev, Tau_prev, Frame_prev, Frame_curr);
+C_temp, F_temp, Tau_temp = TrackCandidateKeypoints(C_prev, F_prev, Tau_prev, Frame_prev, Frame_curr);
  
 % transform some of the C_temp into P_new (triangulation)
 P_new, X_new, C_cleaned, F_cleaned, Tau_cleaned = calculateNewKeypoints(C_temp, R, T, F_temp, Tau_temp);
