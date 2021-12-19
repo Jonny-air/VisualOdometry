@@ -14,7 +14,7 @@ function [P0,X0,Pose] = Initialization(frame1,frame2, K)
 Key_initial = findInitialKeypoints(frame_1, K);
 
 % use KLT to track keypoints to third frame (Andrea)
-Key_matched, P_3 = 
+Key_matched, P_3 = InitialKLT(frame_1, frame_2, Key_initial);
 
 % Do 8 point RANSAC with keypoint pairs
 %%%%%%TODO
