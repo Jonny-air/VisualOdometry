@@ -19,9 +19,17 @@ keypoints_frame1 = findInitialKeypoints(frame1, K);
 [keypoints_frame1,keypoints_frame2] = trackKeypointsKLT(keypoints_frame1, frame1, frame2);
 
 % Estimate pose between the two initial frames
-[R_init,T_init] = poseP3pRansac(keypoints_frame1,keypoints_frame2,K,intrinsics);
+[R_init,T_init,idx_validity] = poseP3pRansac(keypoints_frame1,keypoints_frame2,K,intrinsics);
 T_WC_init = [R_init,T_init'];
+keypoints_frame1 = keypoints_frame1(idx_validity,:);
+keypoints_frame2 = keypoints_frame2(idx_validity,:);
 
+figure(1);
+imshow(frame1);
+hold on;
+plot(keypoints_frame1(:,1), keypoints_frame1(:,2)', 'r.', 'Linewidth', 2);
+%plot(c(1,:), c(2,:), 'gx', 'Linewidth', 2);
+hold off
 
 % Triangulate world points
 X_initial = triangulateInitialLandmark(keypoints_frame1,keypoints_frame2,intrinsics,R_init,T_init);
@@ -30,3 +38,4 @@ X_initial = triangulateInitialLandmark(keypoints_frame1,keypoints_frame2,intrins
 S_init = findNewCandidateKeypoints(frame1,frame2,keypoints_frame1,keypoints_frame2,X_initial, T_WC_init, true);
 
 end
+
