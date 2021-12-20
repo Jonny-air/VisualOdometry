@@ -1,4 +1,4 @@
-function [P0,X0,Pose] = Initialization(frame1,frame2, K)
+function [S_3,Pose_3] = Initialization(frame_1,frame_2, K)
 %INITIALIZATION Initialize the states and pose (with respect to worldframe (1st frame)) using 2 initial frames (1st and 3rd suggested)
 %   -keypoints detection (harris) and matching (KLT) 
 %   -Calculate relative pose (8-points or 5-points) and triangulate 3D point cloud and outlier rejection (RANSAC)
@@ -24,7 +24,9 @@ M_3 = eightPointRansac(Key_matched, P_3);
 X_3 = ...(key_matched, M_3, P_3)
     
 % find keypoints in frame 2 (supress P's) --> (Jeremy)
-C_3, F_3, Tau_3 = ...(frame2, P_3, M_3)
+C_3, F_3, Tau_3 = InitializeCandidatePoints(frame_2, P_3, M_3);
 
+S_3 = {P_3, X_3, C_3, F_3, Tau_3};
+Pose_3 = M_3;
 end
 

@@ -23,6 +23,14 @@ function [S_curr, Pose_curr] = ProcessFrame(S_prev,  Frame_prev, Frame_curr, K)
 % (KLT to find new P-s)
 % P_i = [2,3 ; 4,5; 7,8] X_i = [2,3 ; 4,5; 7,8]
 % P_i+1 = [4,5 ; 7,9] X_i+1 = [2,3 ; 4,5]
+
+P_prev = S_prev{1};
+X_prev = S_prev{2};
+C_prev = S_prev{3};
+F_prev = S_prev{4};
+Tau_prev = S_prev{5};
+
+
 P_temp, X_temp= TrackPreviousKeypoints(P_prev, X_prev, Frame_prev, Frame_curr);
 
 % get current pose from points and world positions (Jonny)
@@ -32,7 +40,7 @@ P_temp, X_temp= TrackPreviousKeypoints(P_prev, X_prev, Frame_prev, Frame_curr);
 C_temp, F_temp, Tau_temp = TrackCandidateKeypoints(C_prev, F_prev, Tau_prev, Frame_prev, Frame_curr);
  
 % transform some of the C_temp into P_new (triangulation)
-P_new, X_new, C_cleaned, F_cleaned, Tau_cleaned = calculateNewKeypoints(C_temp, R, T, F_temp, Tau_temp);
+P_new, X_new, C_cleaned, F_cleaned, Tau_cleaned = calculateNewKeypoints(C_temp, R_curr, T_curr, F_temp, Tau_temp);
 
 % append them to P_temp, and X_temp
 P_curr = [P_temp, P_new];
@@ -40,6 +48,9 @@ X_curr = [X_temp, X_new];
 
 % find new candidate keypoints, supress ones already tracked (harris,
 % supress previous points) (Jeremy)
-C_curr, F_curr, Tau_curr = findNewCandidateKeypoints(P_curr, C_cleaned, F_cleaned, Tau_cleaned, Frame_curr, R, T);
+C_curr, F_curr, Tau_curr = findNewCandidateKeypoints(P_curr, C_cleaned, F_cleaned, Tau_cleaned, Frame_curr, M);
+
+S_curr = {P_curr, X_curr, C_curr, F_curr, Tau_curr};
+Pose_curr = [R_curr, T_curr];
 end
 
