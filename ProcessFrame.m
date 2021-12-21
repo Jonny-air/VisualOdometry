@@ -31,7 +31,7 @@ F_prev = S_prev{4};
 Tau_prev = S_prev{5};
 
 
-[P_temp, X_temp] = TrackPreviousKeypoints(P_prev, X_prev, Frame_prev, Frame_curr);
+[P_temp, X_temp] = TrackPreviousPoints(P_prev, X_prev, Frame_prev, Frame_curr);
 
 % get current pose from points and world positions (Jonny)
 [R_curr, T_curr] = p3pRansac(X_temp, P_temp, K);
