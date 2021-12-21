@@ -11,10 +11,10 @@ function [S_3,Pose_3] = Initialization(frame_1,frame_2, K, intrinsics)
 
 % Find keypoints in first frame (use function from process frame, but don't
 % supress anything) (Jeremy)
-Key_initial = findInitialKeypoints(frame_1, K);
+Key_initial = findInitialKeypoints(frame_1);
 
 % use KLT to track keypoints to third frame (Andrea)
-Key_matched, P_3 = InitialKLT(frame_1, frame_2, Key_initial);
+[Key_matched, P_3] = InitialKLT(frame_1, frame_2, Key_initial);
 
 
 % Do 8 point RANSAC with keypoint pairs
@@ -28,7 +28,7 @@ M_3 = [R_init, T_init'];
 X_3 = triangulateInitialLandmarks(Key_initial, Key_matched, M_3, P_3, intrinsics);
     
 % find keypoints in frame 2 (supress P's) --> (Jeremy)
-C_3, F_3, Tau_3 = InitializeCandidatePoints(frame_2, P_3, M_3);
+[C_3, F_3, Tau_3] = InitializeCandidatePoints(frame_2, P_3, M_3);
 
 S_3 = {P_3, X_3, C_3, F_3, Tau_3};
 Pose_3 = M_3;

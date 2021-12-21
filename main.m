@@ -1,8 +1,9 @@
+
 %% Setup
 clear all
 
 ds = 2; % 0: KITTI, 1: Malaga, 2: parking
-parking_path = '../parking';
+parking_path = 'parking';
 bootstrap_frames = [1 3];
 
 if ds == 0
@@ -87,10 +88,8 @@ end
 % Get camera intrinsic parameters object
 intrinsics = getIntrinsicsCam(K);
 
-[S, T] = Initialization(img0,img1,K);
+[S,T] = Initialization(img0,img1,K, intrinsics);
 
-p = S.P;
-c = S.C;
 
 % figure(1);
 % imshow(img1);
@@ -107,17 +106,19 @@ c = S.C;
 % Pose append Pose_new
 
 %% Plot
+S_i = S;
+for i = 3:10
 
-for i = 3:60
+    frame_i = im2uint8(rgb2gray(imread([parking_path, sprintf('/images/img_%05d.png',i)])));
+    frame_ii = im2uint8(rgb2gray(imread([parking_path, sprintf('/images/img_%05d.png',i+1)])));
 
-    img = im2uint8(rgb2gray(imread([parking_path, sprintf('/images/img_%05d.png',i)])));
 
-    S_i+1, Pose_i+1 = ProcessFrame(S_i, Frame_i, frame_i+1)
-    
-   % p = S.P;
-   % imshow(img); hold on;
-   % plot(p(1,:), p(2,:), 'rx', 'Linewidth', 2);
-   % %plot(c(1,:), c(2,:), 'gx', 'Linewidth', 2);
-   % hold off;
+    S_ii, Pose_ii = ProcessFrame(S_i, frame_i, frame_ii, K);
+    S_i = S_ii;
+    p = S_i{1};
+    imshow(frame_ii); hold on;
+    plot(p(1,:), p(2,:), 'rx', 'Linewidth', 2);
+    % %plot(c(1,:), c(2,:), 'gx', 'Linewidth', 2);
+    hold off;
     pause(0.01);
 end
