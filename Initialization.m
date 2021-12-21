@@ -18,7 +18,8 @@ Key_matched, P_3 = InitialKLT(frame_1, frame_2, Key_initial);
 
 % Do 8 point RANSAC with keypoint pairs
 %%%%%%TODO
-M_3 = eightPointRansac(Key_matched, P_3);
+M_3 = eightPointRansac(Key_matched, P_3, K);
+
 
 % triangulate X'sm M_0 is 0
 X_3 = ...(key_matched, M_3, P_3)
