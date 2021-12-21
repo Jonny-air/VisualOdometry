@@ -16,13 +16,16 @@ Key_initial = findInitialKeypoints(frame_1, K);
 % use KLT to track keypoints to third frame (Andrea)
 Key_matched, P_3 = InitialKLT(frame_1, frame_2, Key_initial);
 
+
 % Do 8 point RANSAC with keypoint pairs
 %%%%%%TODO
-M_3 = eightPointRansac(Key_matched, P_3, K);
+[E,validity] = estimateEssentialMatrix(Key_matched, P_3,intrinsics);
+[R_init,T_init] = relativeCameraPose(E,intrinsics,keypoints_frame1,keypoints_frame2);
+M_3 = [R_init, T_init'];
 
 
 % triangulate X'sm M_0 is 0
-X_3 =triangulateInitialLandmarks(Key_initial, key_matched, M_3, P_3, intrinsics)
+X_3 = triangulateInitialLandmarks(Key_initial, Key_matched, M_3, P_3, intrinsics);
     
 % find keypoints in frame 2 (supress P's) --> (Jeremy)
 C_3, F_3, Tau_3 = InitializeCandidatePoints(frame_2, P_3, M_3);
