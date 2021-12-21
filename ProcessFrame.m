@@ -41,6 +41,7 @@ M = [R_curr, T_curr];
  
 % transform some of the C_temp into P_new (triangulation)
 [P_new, X_new, C_cleaned, F_cleaned, Tau_cleaned] = calculateNewKeypoints(C_temp, R_curr, T_curr, F_temp, Tau_temp, K);
+
 % append them to P_temp, and X_temp
 P_curr = [P_temp, P_new];
 X_curr = [X_temp, X_new];
