@@ -24,7 +24,9 @@ M_3 = eightPointRansac(Key_matched, P_3);
 X_3 =triangulateInitialLandmarks(Key_initial, key_matched, M_3, P_3, intrinsics)
     
 % find keypoints in frame 2 (supress P's) --> (Jeremy)
-S_3 = findNewCandidateKeyPoints(frame_2, P_3, M_3);
+C_3, F_3, Tau_3 = InitializeCandidatePoints(frame_2, P_3, M_3);
+
+S_3 = {P_3, X_3, C_3, F_3, Tau_3};
 Pose_3 = M_3;
 
 end
