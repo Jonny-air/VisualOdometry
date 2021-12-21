@@ -40,7 +40,7 @@ P_temp, X_temp= TrackPreviousKeypoints(P_prev, X_prev, Frame_prev, Frame_curr);
 C_temp, F_temp, Tau_temp = TrackCandidateKeypoints(C_prev, F_prev, Tau_prev, Frame_prev, Frame_curr);
  
 % transform some of the C_temp into P_new (triangulation)
-P_new, X_new, C_cleaned, F_cleaned, Tau_cleaned = calculateNewKeypoints(C_temp, R_curr, T_curr, F_temp, Tau_temp);
+P_new, X_new, C_cleaned, F_cleaned, Tau_cleaned = calculateNewKeypoints(C_temp, R_curr, T_curr, F_temp, Tau_temp, K);
 
 % append them to P_temp, and X_temp
 P_curr = [P_temp, P_new];
