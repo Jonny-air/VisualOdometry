@@ -1,10 +1,17 @@
-function [P_new, X_new, C_cleaned, F_cleaned, Tau_cleaned] = calculateNewKeypoints(C_temp, R_curr, T_curr, F_temp, Tau_temp, K)
+function [P_new, X_new, C_cleaned, F_cleaned, Tau_cleaned] = calculateNewKeypoints(P_temp, C_temp, R_curr, T_curr, F_temp, Tau_temp, K)
 %CALCULATENEWKEYPOINTS Summary of this function goes here
 % transform some of the C_temp into P_new (triangulation)
 
-    % check if baseline threshold was passed
+    %baseline threshold
     thresh_baseline = 1; %m
-
+    
+    %min num keypoints
+    P_min = 50;
+    if size(P_temp, 2) < P_min
+        thresh_baseline = 0.4;
+    end
+    
+    
     X_new = [];
     P_new= [];
     C_cleaned = C_temp;

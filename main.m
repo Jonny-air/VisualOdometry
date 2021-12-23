@@ -96,7 +96,7 @@ for i = range
     end
     
     % Update S and Pose for current frame:
-    [S, Poses(:, :, i)] = ProcessFrame(S, prev_img, image, K, keypointsTracker);
+    [S, Poses(:, :, i)] = ProcessFrame(S, prev_img, image, K, intrinsics, keypointsTracker);
     
     % get keypoints in pixel coordinates
     keypoints = S.P;

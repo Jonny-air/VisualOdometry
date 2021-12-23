@@ -1,4 +1,4 @@
-function [S_curr, Pose_curr] = ProcessFrame(S_prev,  Frame_prev, Frame_curr, K, keypointsTracker)
+function [S_curr, Pose_curr] = ProcessFrame(S_prev,  Frame_prev, Frame_curr, K, intrinsics, keypointsTracker)
 %PROCESSFRAME take previous state, previous frame and current frame and
 %output current state and current pose.
 %   -keypoints traking (KLT)
@@ -35,8 +35,11 @@ Tau_prev = S_prev.Tau;
 X_temp = X_prev(: , validity_idx);
 
 % get current pose from points and world positions
-[R_curr, T_curr] = p3pRansac(X_temp, P_temp, K);
+[R_curr, T_curr, inlierIdx] = p3pRansac(X_temp, P_temp, intrinsics);
 M = [R_curr, T_curr];
+% only keep inliers
+X_temp = X_temp(:, inlierIdx);
+P_temp = P_temp(:, inlierIdx);
 
 % track C's from before with KLT and get new coordinates (Andrea)
 % [C_temp, F_temp, Tau_temp] = TrackCandidateKeypoints(C_prev, F_prev, Tau_prev, Frame_prev, Frame_curr);
@@ -45,7 +48,7 @@ F_temp = F_prev(: , validity_idx);
 Tau_temp = Tau_prev(: , validity_idx);
 
 % transform some of the C_temp into P_new (triangulation)
-[P_new, X_new, C_cleaned, F_cleaned, Tau_cleaned] = calculateNewKeypoints(C_temp, R_curr, T_curr, F_temp, Tau_temp, K);
+[P_new, X_new, C_cleaned, F_cleaned, Tau_cleaned] = calculateNewKeypoints(P_temp, C_temp, R_curr, T_curr, F_temp, Tau_temp, K);
 
 % append them to P_temp, and X_temp
 P_curr = [P_temp, P_new];
