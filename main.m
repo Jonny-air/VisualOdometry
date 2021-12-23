@@ -3,7 +3,7 @@
 clear all
 
 ds = 2; % 0: KITTI, 1: Malaga, 2: parking
-parking_path = 'parking';
+parking_path = './data/parking';
 bootstrap_frames = [1 3];
 
 if ds == 0
@@ -60,65 +60,63 @@ else
     assert(false);
 end
 
-%% Continuous operation
-% range = (bootstrap_frames(2)+1):last_frame;
-% for i = range
-%     fprintf('\n\nProcessing frame %d\n=====================\n', i);
-%     if ds == 0
-%         image = imread([kitti_path '/05/image_0/' sprintf('%06d.png',i)]);
-%     elseif ds == 1
-%         image = rgb2gray(imread([malaga_path ...
-%             '/malaga-urban-dataset-extract-07_rectified_800x600_Images/' ...
-%             left_images(i).name]));
-%     elseif ds == 2
-%         image = im2uint8(rgb2gray(imread([parking_path ...
-%             sprintf('/images/img_%05d.png',i)])));
-%     else
-%         assert(false);
-%     end
-%     % Makes sure that plots refresh.    
-%     pause(0.01);
-%     
-%     prev_img = image;
-% end
-
-
 %% Initialisation
+
+% record poses for plotting later on
+Poses = zeros([3, 4, last_frame]);
 
 % Get camera intrinsic parameters object
 intrinsics = getIntrinsicsCam(K);
 
-[S,T] = Initialization(img0,img1,K, intrinsics);
+% KLT Keypoint tracker, keep it here since we need for both init and
+% process
+keypointsTracker = vision.PointTracker('MaxBidirectionalError', 3);
+
+[S,Poses(:, :, bootstrap_frames(2))] = Initialization(img0,img1,K, intrinsics, keypointsTracker);
+
+prev_img = img1; % second image from bootstrapping
 
 
-% figure(1);
-% imshow(img1);
-% hold on;
-% plot(p(1,:), p(2,:), 'r.', 'Linewidth', 2);
-% plot(c(1,:), c(2,:), 'gx', 'Linewidth', 2);
-% hold off
+%% Continuous operation
 
-%% Continuous
-
-% Pose = []
-% for i = 3:end
-% S_i+1, Pose_i+1 = ProcessFrame(S_i, Frame_i, frame_i+1)
-% Pose append Pose_new
-
-%% Plot
-S_i = S;
-for i = 3:10
-
-    frame_i = im2uint8(rgb2gray(imread([parking_path, sprintf('/images/img_%05d.png',i)])));
-    frame_ii = im2uint8(rgb2gray(imread([parking_path, sprintf('/images/img_%05d.png',i+1)])));
-
-
-    S_ii, Pose_ii = ProcessFrame(S_i, frame_i, frame_ii, K);
-    S_i = S_ii;
-    p = S_i{1};
-    imshow(frame_ii); hold on;
-    plot(p(1,:), p(2,:), 'rx', 'Linewidth', 2);
+range = (bootstrap_frames(2)+1):last_frame;
+for i = range
+    fprintf('\n\nProcessing frame %d\n=====================\n', i);
+    if ds == 0
+        image = imread([kitti_path '/05/image_0/' sprintf('%06d.png',i)]);
+    elseif ds == 1
+        image = rgb2gray(imread([malaga_path ...
+            '/malaga-urban-dataset-extract-07_rectified_800x600_Images/' ...
+            left_images(i).name]));
+    elseif ds == 2
+        image = im2uint8(rgb2gray(imread([parking_path ...
+            sprintf('/images/img_%05d.png',i)])));
+    else
+        assert(false);
+    end
+    
+    % Update S and Pose for current frame:
+    [S, Poses(:, :, i)] = ProcessFrame(S, prev_img, image, K, keypointsTracker);
+    
+    % get keypoints in pixel coordinates
+    keypoints = S.P;
+    
+    % plot keypoints and image
+    subplot(2, 1, 1);
+    imshow(image); hold on;
+    plot(keypoints(1,:), keypoints(2,:), 'rx', 'Linewidth', 2);
     % %plot(c(1,:), c(2,:), 'gx', 'Linewidth', 2);
+    
+    subplot(2, 1, 2);
+    % plot pose 
+    x_pos = Poses(1, 4, (bootstrap_frames(2)+1):i);
+    y_pos = Poses(2, 4, (bootstrap_frames(2)+1):i);
+    plot(x_pos(:), y_pos(:), 'rx', 'Linewidth', 2);
     hold off;
+    
+    % Makes sure that plots refresh.    
     pause(0.01);
+    
+    prev_img = image;
 end
+

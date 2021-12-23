@@ -20,23 +20,25 @@ function [P_new, X_new, C_cleaned, F_cleaned, Tau_cleaned] = calculateNewKeypoin
 
     % project onto the orthogonal vector for which the taus were found, (ignore forward motion)
     % - project onto z vector and then subsctract
-    forward_vectors = sum(motions * Tau_temp(7:9, :)) * Tau_temp(7:9, :);
+    forward_vectors = sum(motions .* Tau_temp(7:9, :)) .* Tau_temp(7:9, :);
     % get the norm of the columns
     baselines = vecnorm(motions - forward_vectors);
-
+    % triangulate 
+    triangulation_idxs = [];
     for i=1:size(baselines, 2)
         if (baselines(i) > thresh_baseline)
-            % triangulate 
+            triangulation_idxs = [triangulation_idxs, i];
             rot_matrix_i = reshape(Tau_temp(1:9, i), [3,3]);
             trans_vec_i = Tau_temp(10:12, i); 
             camMatrix_i = cameraMatrix(intrinsics,rot_matrix_i,trans_vec_i);
-            worldPoint = triangulate(F_temp(i)',C_temp(i)',camMatrix_i,camMatrix_curr);
+            worldPoint = triangulate(F_temp(:, i)',C_temp(:, i)',camMatrix_i,camMatrix_curr);
             X_new = [X_new, worldPoint'];
-            P_new = [P_new, C_temp(i)];
-            C_cleaned(:, i) = [];
-            F_cleaned(:, i) = [];
-            Tau_cleaned(:, i) = [];
+            P_new = [P_new, C_temp(:, i)];
         end
     end
+    
+    C_cleaned(:, triangulation_idxs) = [];
+    F_cleaned(:, triangulation_idxs) = [];
+    Tau_cleaned(:, triangulation_idxs) = [];
 end
 

@@ -7,6 +7,7 @@ imageSize      = [2*principalPoint(1), 2*principalPoint(2)];
 intrinsics = cameraIntrinsics(focalLength,principalPoint,imageSize);
 % this function solves the perspective-n-point (PnP) problem using the perspective-three-point (P3P) algorithm [1]. 
 % The function also eliminates spurious correspondences using the M-estimator sample consensus (MSAC) algorithm.
-[R_curr, T_curr] = estimateWorldCameraPose(P_img, P_world, intrinsics);
+[R_curr, T_temp] = estimateWorldCameraPose(P_img', P_world', intrinsics);
+T_curr = T_temp';
 end
 

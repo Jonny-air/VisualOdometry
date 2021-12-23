@@ -1,4 +1,4 @@
-function [S_curr, Pose_curr] = ProcessFrame(S_prev,  Frame_prev, Frame_curr, K)
+function [S_curr, Pose_curr] = ProcessFrame(S_prev,  Frame_prev, Frame_curr, K, keypointsTracker)
 %PROCESSFRAME take previous state, previous frame and current frame and
 %output current state and current pose.
 %   -keypoints traking (KLT)
@@ -24,21 +24,26 @@ function [S_curr, Pose_curr] = ProcessFrame(S_prev,  Frame_prev, Frame_curr, K)
 % P_i = [2,3 ; 4,5; 7,8] X_i = [2,3 ; 4,5; 7,8]
 % P_i+1 = [4,5 ; 7,9] X_i+1 = [2,3 ; 4,5]
 
-P_prev = S_prev{1};
-X_prev = S_prev{2};
-C_prev = S_prev{3};
-F_prev = S_prev{4};
-Tau_prev = S_prev{5};
+P_prev = S_prev.P;
+X_prev = S_prev.X;
+C_prev = S_prev.C;
+F_prev = S_prev.F;
+Tau_prev = S_prev.Tau;
 
+% track points via KLT
+[P_temp, validity_idx] = TrackPreviousPoints(P_prev, Frame_curr, keypointsTracker);
+X_temp = X_prev(: , validity_idx);
 
-[P_temp, X_temp] = TrackPreviousPoints(P_prev, X_prev, Frame_prev, Frame_curr);
-
-% get current pose from points and world positions (Jonny)
+% get current pose from points and world positions
 [R_curr, T_curr] = p3pRansac(X_temp, P_temp, K);
 M = [R_curr, T_curr];
+
 % track C's from before with KLT and get new coordinates (Andrea)
-[C_temp, F_temp, Tau_temp] = TrackCandidateKeypoints(C_prev, F_prev, Tau_prev, Frame_prev, Frame_curr);
- 
+% [C_temp, F_temp, Tau_temp] = TrackCandidateKeypoints(C_prev, F_prev, Tau_prev, Frame_prev, Frame_curr);
+[C_temp, validity_idx] = TrackPreviousPoints(C_prev, Frame_curr, keypointsTracker);
+F_temp = F_prev(: , validity_idx);
+Tau_temp = Tau_prev(: , validity_idx);
+
 % transform some of the C_temp into P_new (triangulation)
 [P_new, X_new, C_cleaned, F_cleaned, Tau_cleaned] = calculateNewKeypoints(C_temp, R_curr, T_curr, F_temp, Tau_temp, K);
 
@@ -48,9 +53,14 @@ X_curr = [X_temp, X_new];
 
 % find new candidate keypoints, supress ones already tracked (harris,
 % supress previous points) (Jeremy)
-[C_curr, F_curr, Tau_curr] = findNewCandidateKeypoints(P_curr, C_cleaned, F_cleaned, Tau_cleaned, Frame_curr, M);
+[C_curr, F_curr, Tau_curr] = findNewCandidateKeypoints(Frame_curr, P_curr, C_cleaned, F_cleaned, Tau_cleaned, M, false);
 
-S_curr = {P_curr, X_curr, C_curr, F_curr, Tau_curr};
+S_curr.P = P_curr;
+S_curr.X = X_curr;
+S_curr.C = C_curr;
+S_curr.F = F_curr;
+S_curr.Tau = Tau_curr;
+
 Pose_curr = [R_curr, T_curr];
 end
 
