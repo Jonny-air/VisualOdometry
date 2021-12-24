@@ -14,23 +14,32 @@ keypoints_frame1 = findInitialKeypoints(frame1);
 
 % use KLT to track keypoints to next frame
 % initializes keypoint tracker
-[keypoints_frame1,keypoints_frame2] = trackKeypointsKLT(keypoints_frame1, frame1, frame2, keypointsTracker);
+keypointsTracker = vision.PointTracker('MaxBidirectionalError', 3);
+initialize(keypointsTracker, keypoints_frame1, frame1);
+[keypoints_frame2_all, validity] = keypointsTracker(frame2);
+keypoints_frame2 =keypoints_frame2_all(validity, :);
+keypoints_frame1 =keypoints_frame1(validity, :);
+
 
 % Estimate pose between the two initial frames
-[R_init,T_init,idx_validity] = poseP3PRansac(keypoints_frame1,keypoints_frame2,K,intrinsics);
+[E,validity] = estimateEssentialMatrix(keypoints_frame1, keypoints_frame2,intrinsics);
+[R_init,T_init] = relativeCameraPose(E,intrinsics,keypoints_frame1,keypoints_frame2);
 T_WC_init = [R_init,T_init'];
-keypoints_frame1 = keypoints_frame1(idx_validity,:);
-keypoints_frame2 = keypoints_frame2(idx_validity,:);
+keypoints_frame1 = keypoints_frame1(validity,:);
+keypoints_frame2 = keypoints_frame2(validity,:);
 
-figure(1);
-imshow(frame1);
-hold on;
-plot(keypoints_frame1(:,1), keypoints_frame1(:,2)', 'r.', 'Linewidth', 2);
-%plot(c(1,:), c(2,:), 'gx', 'Linewidth', 2);
-hold off
+
+% figure(1);
+% imshow(frame1);
+% hold on;
+% plot(keypoints_frame1(:,1), keypoints_frame1(:,2)', 'r.', 'Linewidth', 2);
+% hold off
 
 % Triangulate world points
-X_initial = triangulateInitialLandmark(keypoints_frame1,keypoints_frame2,intrinsics,R_init,T_init);
+% Triangulate initial landmarks
+camMatrix = cameraMatrix(intrinsics,R_init,T_init);
+X_init = triangulate(keypoints_frame1,keypoints_frame2,camMatrix,camMatrix);
+% X_init = X_init(validity,:);
 
 % Find new candidates and return current pose < S = [P,X,C,F,Tau] >
 % frame2, prev_P, prev_C, prev_F, prev_Tau, M, initial
@@ -38,10 +47,10 @@ P_curr = keypoints_frame2';
 prev_C = [];
 prev_F = prev_C;
 prev_Tau = prev_C;
-[C_curr, F_curr, Tau_curr] = findNewCandidateKeypoints(frame2, P_curr, prev_C, prev_F, prev_Tau, T_WC_init, true);
+[C_curr, F_curr, Tau_curr] = findNewCandidateKeypoints(frame2, keypoints_frame2_all, prev_C, prev_F, prev_Tau, T_WC_init, true);
 
 S_init.P = P_curr;
-S_init.X = X_initial';
+S_init.X = X_init';
 S_init.C = C_curr;
 S_init.F = F_curr;
 S_init.Tau = Tau_curr;
