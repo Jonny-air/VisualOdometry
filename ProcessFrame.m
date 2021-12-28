@@ -34,7 +34,7 @@ Tau_prev = S_prev{5};
 [P_temp, X_temp] = TrackPreviousPoints(P_prev, X_prev, Frame_prev, Frame_curr);
 
 % get current pose from points and world positions (Jonny)
-[R_curr, T_curr] = p3pRansac(X_temp, P_temp, K);
+[R_curr, T_curr] = p3pRansac(X_temp', [P_temp(2,:)', P_temp(1,:)'], K);
 M = [R_curr, T_curr];
 % track C's from before with KLT and get new coordinates (Andrea)
 [C_temp, F_temp, Tau_temp] = TrackCandidateKeypoints(C_prev, F_prev, Tau_prev, Frame_prev, Frame_curr);

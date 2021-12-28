@@ -19,13 +19,13 @@ Key_initial = findInitialKeypoints(frame_1);
 
 % Do 8 point RANSAC with keypoint pairs
 %%%%%%TODO
-[E,validity] = estimateEssentialMatrix(Key_matched, P_3,intrinsics);
-[R_init,T_init] = relativeCameraPose(E,intrinsics,keypoints_frame1,keypoints_frame2);
+E = estimateEssentialMatrix([Key_matched; ones(1,size(Key_matched,2))], [P_3; ones(1,size(P_3,2))],K,K);
+[R_init,T_init] = relativeCameraPose(E,intrinsics, [Key_matched(2,:)', Key_matched(1,:)'], [P_3(2,:)', P_3(1,:)']);
 M_3 = [R_init, T_init'];
 
 
 % triangulate X'sm M_0 is 0
-X_3 = triangulateInitialLandmarks(Key_initial, Key_matched, M_3, P_3, intrinsics);
+X_3 = triangulateInitialLandmark([Key_matched(2,:)', Key_matched(1,:)'], [P_3(2,:)', P_3(1,:)'], intrinsics, R_init, T_init);
     
 % find keypoints in frame 2 (supress P's) --> (Jeremy)
 [C_3, F_3, Tau_3] = InitializeCandidatePoints(frame_2, P_3, M_3);

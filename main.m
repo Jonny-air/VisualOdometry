@@ -113,7 +113,7 @@ for i = 3:10
     frame_ii = im2uint8(rgb2gray(imread([parking_path, sprintf('/images/img_%05d.png',i+1)])));
 
 
-    S_ii, Pose_ii = ProcessFrame(S_i, frame_i, frame_ii, K);
+    [S_ii, Pose_ii] = ProcessFrame(S_i, frame_i, frame_ii, K);
     S_i = S_ii;
     p = S_i{1};
     imshow(frame_ii); hold on;
