@@ -4,7 +4,7 @@ function [C_3, F_3, Tau_3] = InitializeCandidatePoints(frame_2, P_3, M_3)
 %parameters
 corner_patch_size = 9;
 harris_kappa = 0.08;
-num_keypoints = 200;
+num_keypoints = 100;
 nonmaximum_supression_radius = 8;
 
 % Harris

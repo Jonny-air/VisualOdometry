@@ -8,7 +8,7 @@ temp_scores = padarray(scores, [r r]);
 num_old_keypoints = size(oldkeypoints,2);
 
 for j=1:num_old_keypoints
-    kp = [oldkeypoints(1,j); oldkeypoints(2,j)];
+    kp = [oldkeypoints(1,j); oldkeypoints(2,j)]+r;
     temp_scores(kp(1)-r:kp(1)+r, kp(2)-r:kp(2)+r) = ...
         zeros(2*r + 1, 2*r + 1);
 end

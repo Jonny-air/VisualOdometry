@@ -10,7 +10,7 @@ initialize(pointTracker, P_prev_xy, Frame_prev)
 
 [P_temp_xy, validity_xy] = pointTracker(Frame_curr);
 
-P_temp = [P_prev_xy(:,2)'; P_prev_xy(:,1)'];
+P_temp = [P_temp_xy(:,2)'; P_temp_xy(:,1)'];
 
 validity = validity_xy';
 

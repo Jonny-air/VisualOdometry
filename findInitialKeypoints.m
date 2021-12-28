@@ -2,7 +2,7 @@ function keypoints_frame_1 = findInitialKeypoints(frame_1)
 
 corner_patch_size = 9;
 harris_kappa = 0.08;
-num_keypoints = 200;
+num_keypoints = 1000;
 nonmaximum_supression_radius = 8;
 
 % Harris
